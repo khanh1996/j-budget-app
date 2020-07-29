@@ -1,0 +1,17 @@
+3 module : UI Controler, Data Controller, Controller
+
+- add event handler
+- get input value
+- add the new item to our structure
+- add the new item to the UI
+- Caculation budget
+- update the UI
+
+
+
+
+
+
+ tabNine
+bracket pair colorizer 2
+Auto rename tag
