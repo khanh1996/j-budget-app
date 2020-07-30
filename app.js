@@ -23,7 +23,7 @@ var controller = (function (budgetCtrl, UICtrl) {
     var arrInputInc = [];
     var arrInputExp = [];
     var index = 0;
-
+    console.log("testtttttttttttttt");
     // 4. Calculate budget
 
     function addNewItem(listElement, itemInput) {
