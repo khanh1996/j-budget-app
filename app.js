@@ -22,8 +22,9 @@ var UIController = (function () {
 var controller = (function (budgetCtrl, UICtrl) {
     var arrInputInc = [];
     var arrInputExp = [];
-    var index = 0;
-    console.log("testtttttttttttttt");
+    var indexInc = 0;
+    var indexExp = 0;
+
     // 4. Calculate budget
 
     function addNewItem(listElement, itemInput) {
@@ -34,8 +35,12 @@ var controller = (function (budgetCtrl, UICtrl) {
         var item__delete = document.createElement("div");
         var button = document.createElement("button");
         var i = document.createElement("i");
+
         // set attr
-        item.id = "income-" + index++;
+        itemInput.inputType === "inc"
+            ? (item.id = "income-" + indexInc++)
+            : (item.id = "expense-" + indexExp++);
+
         item.className = "item clearfix";
         item__description.className = "item__description";
         right.className = "right clearfix";
@@ -44,10 +49,12 @@ var controller = (function (budgetCtrl, UICtrl) {
         button.className = "item__delete--btn";
         i.className = "ion-ios-close-outline";
         item__delete.click = "myFunction()";
+
         // define content
         item__description.innerText = itemInput.inputDescription;
-        item__value.innerText = "+" + itemInput.inputValue;
-
+        itemInput.inputType === "inc"
+            ? (item__value.innerText = "+" + itemInput.inputValue)
+            : (item__value.innerText = "-" + itemInput.inputValue);
         // build dom html
         listElement.appendChild(item);
         item.append(item__description, right);
@@ -57,22 +64,35 @@ var controller = (function (budgetCtrl, UICtrl) {
     }
 
     function deleteItem() {
-        document
-            .querySelector(".item__delete")
-            .addEventListener("click", function () {});
+        this.parentElement.parentElement.remove();
     }
 
     // 5. Update the UI
     document.querySelector(".add__btn").addEventListener("click", function () {
         // 1. Get input value
         var input = UICtrl.getInputValue();
+        console.log(input);
+        if (input.inputType === "inc") {
+            var income__list = document.querySelector(".income__list");
+            addNewItem(income__list, input);
+            arrInputInc.push(input);
+        } else {
+            var expenses__list = document.querySelector(".expenses__list");
+            addNewItem(expenses__list, input);
+            arrInputExp.push(input);
+        }
         // 2. Add the new item to our data structure
-        var income__list = document.querySelector(".income__list");
-        addNewItem(income__list, input);
-        deleteItem();
-    });
 
-    // Delete itemconsole.log(arrInputInc);
+        console.log(arrInputInc);
+        console.log(arrInputExp);
+        // deleteItem();
+        //console.log(input);
+        // 3 Delete element
+        var button__delete = document.getElementsByClassName("item__delete");
+        for (let index = 0; index < button__delete.length; index++) {
+            button__delete[index].addEventListener("click", deleteItem);
+        }
+    });
 
     document.addEventListener("keypress", function (event) {
         if (event.keyCode === 13) {
