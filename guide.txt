@@ -15,3 +15,9 @@
  tabNine
 bracket pair colorizer 2
 Auto rename tag
+
+dùng splice() để delete 1 phần tử
+
+dùng event.target để xác định click vào phần từ nào
+
+removeChild xoá phần từ con
