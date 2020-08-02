@@ -51,6 +51,27 @@ var budgetController = (function () {
             });
             return data.totals;
         },
+        removeItem: function (self) {
+            var idStr = self.parentElement.parentElement.id;
+            var idDel = parseInt(idStr.charAt(idStr.length - 1));
+            if (idStr.includes("income")) {
+                for (let index = 0; index < data.allItems.inc.length; index++) {
+                    const element = data.allItems.inc[index];
+
+                    if (idDel === element.id) {
+                        data.allItems.inc.splice(element.id, 1);
+                    }
+                }
+            } else if (idStr.includes("expense")) {
+                for (let index = 0; index < data.allItems.exp.length; index++) {
+                    const element = data.allItems.exp[index];
+
+                    if (idDel === element.id) {
+                        data.allItems.exp.splice(element.id, 1);
+                    }
+                }
+            }
+        },
     };
 })();
 
@@ -67,8 +88,13 @@ var UIController = (function () {
         budgetExpensesValue: ".budget__expenses--value",
         budgetValue: ".budget__value",
         budgetExpensesPercent: ".budget__expenses--percentage",
+        itemDelete: ".item__delete",
+        itemPercentage: ".item__percentage",
     };
     return {
+        getDOMStrings: function () {
+            return DOMStrings;
+        },
         getInput: function () {
             return {
                 type: document.querySelector(DOMStrings.inputType).value,
@@ -94,17 +120,12 @@ var UIController = (function () {
             html = html.replace("%id%", item.id);
             html = html.replace("%description%", item.description);
             html = html.replace("%value%", item.value);
-
             // Add item to DOM
             document
                 .querySelector(element)
                 .insertAdjacentHTML("beforeend", html);
         },
-        getDOMStrings: function () {
-            return DOMStrings;
-        },
         getAllData: function (allData, type) {
-            console.log(allData);
             if (type === "inc") {
                 document.querySelector(
                     DOMStrings.budgetIncomeValue
@@ -117,27 +138,41 @@ var UIController = (function () {
             // show total budget
             var total = allData.inc - allData.exp;
             document.querySelector(DOMStrings.budgetValue).textContent = total;
-            // show budget Expenses
+            // show budget item Expenses percent
 
+            // if (total > 0) {
+            //     var valueItemPercent = Math.floor((allData.exp * 100) / total);
+            //     document.querySelector(
+            //         DOMStrings.itemPercentage
+            //     ).textContent = valueItemPercent;
+            // } else {
+            //     valueItemPercent = 0;
+            // }
+
+            // show All budget Expenses percent
             if (allData.inc >= allData.exp && allData.inc != 0) {
-                var budgetPercent = (allData.exp * 100) / allData.inc;
-                console.log(budgetPercent);
+                var budgetPercent = Math.floor(
+                    (allData.exp * 100) / allData.inc
+                );
                 document.querySelector(
                     DOMStrings.budgetExpensesPercent
-                ).textContent = budgetPercent;
+                ).textContent = budgetPercent + "%";
             } else {
                 document.querySelector(
                     DOMStrings.budgetExpensesPercent
-                ).textContent = 0;
+                ).textContent = 0 + "%";
             }
+        },
+        removeListItem: function (self) {
+            self.parentElement.parentElement.remove();
         },
     };
 })();
 
 // GOALBAL APP CONTROLLER Nơi thao tác với người dùng
 var controller = (function (budgetCtrl, UICtrl) {
+    var DOM = UICtrl.getDOMStrings();
     function setupListenerEvents() {
-        var DOM = UICtrl.getDOMStrings();
         document
             .querySelector(DOM.inputBtn)
             .addEventListener("click", ctrlAddItem);
@@ -154,15 +189,32 @@ var controller = (function (budgetCtrl, UICtrl) {
 
         // 2. Add the new item to our data structure
         var newItem = budgetCtrl.addItem(input, input.type);
-
         // 3.  Add the new item to the UI
         UICtrl.addListItem(input.type, newItem);
-
         // 4. Calculate budget
         var allData = budgetCtrl.calculateBudget(input.type);
-
         // 5. Update the UI
         UICtrl.getAllData(allData, input.type);
+        // 6. Delete item
+        // setup click for each item delete
+        var arrAllItemDel = document.querySelectorAll(DOM.itemDelete);
+        for (let index = 0; index < arrAllItemDel.length; index++) {
+            const element = arrAllItemDel[index];
+            element.addEventListener("click", ctrlDeleteItem);
+        }
+    }
+    function ctrlDeleteItem() {
+        // delete DB
+        var idStr = this.parentElement.parentElement.id;
+        budgetCtrl.removeItem(this);
+        if (idStr.includes("income")) {
+            var allData = budgetCtrl.calculateBudget("inc");
+            UICtrl.getAllData(allData, "inc");
+        } else if (idStr.includes("expense")) {
+            var allData = budgetCtrl.calculateBudget("exp");
+            UICtrl.getAllData(allData, "exp");
+        }
+        UICtrl.removeListItem(this);
     }
 
     return {
